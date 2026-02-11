@@ -1,4 +1,4 @@
-import streamlit as st
+ import streamlit as st
 import google.generativeai as genai
 
 # --- KONFIGURASI HALAMAN ---
@@ -6,33 +6,36 @@ st.set_page_config(page_title="Penerjemah Khusus Taiwan", page_icon="🇹🇼", 
 
 # --- KONFIGURASI API ---
 try:
+    # Memastikan API Key diambil dari Secrets Streamlit
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 except Exception:
     st.error("API Key belum terpasang di Secrets Streamlit!")
     st.stop()
 
-# Menggunakan model Gemini
-model = genai.GenerativeModel("gemini-2.5-flash") # Atau gemini-2.0-flash jika sudah tersedia
+# Menggunakan model Gemini 1.5 Flash (Sangat cepat dan akurat)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # --- TAMPILAN UTAMA ---
 st.title("🇹🇼 Penerjemah Khusus Mandarin Taiwan")
 st.subheader("Input bahasa apapun ➔ Hasil wajib Mandarin Taiwan")
+
+# PERBAIKAN: Menggunakan unsafe_allow_html=True
 st.markdown("""
 <style>
-    .reportview-container { background: #f0f2f6; }
+    .stApp { background-color: #f0f2f6; }
 </style>
-""", unsafe_allow_index=True)
+""", unsafe_allow_html=True)
 
 # --- LOGIKA INPUT ---
-st.info("Masukkan teks dalam bahasa apapun (Inggris, Indonesia, Jepang, dll). Sistem hanya akan memberikan hasil dalam Mandarin Taiwan (Traditional Chinese).")
+st.info("Masukkan teks dalam bahasa apapun. Sistem hanya akan memberikan hasil dalam Mandarin Taiwan (Traditional Chinese).")
 
 user_input = st.text_area("Masukkan teks di sini:", placeholder="Contoh: How are you? / Apa kabar?")
 
-if st.button("Terjemahkan Sekarang"):
+if st.button("Terjemahkan Sekarang", use_container_width=True):
     if user_input.strip() == "":
         st.warning("Mohon masukkan teks terlebih dahulu.")
     else:
-        with st.spinner("Sedang menerjemahkan..."):
+        with st.spinner("Guru sedang menerjemahkan..."):
             try:
                 # PROMPT KETAT (Guardrail)
                 prompt_instruksi = (
@@ -51,7 +54,7 @@ if st.button("Terjemahkan Sekarang"):
                 
                 # Menampilkan Hasil
                 st.success("### Hasil Terjemahan (Traditional Chinese)")
-                st.markdown(f"### {response.text}")
+                st.write(response.text)
                 
             except Exception as e:
                 st.error(f"Terjadi kesalahan: {e}")
