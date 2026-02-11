@@ -12,7 +12,7 @@ except Exception:
     st.error("API Key belum terpasang di Secrets Streamlit!")
     st.stop()
 
-# Menggunakan model Gemini 2.5 Flash yang stabil
+# Menggunakan model Gemini 2.5 Flash (Sangat stabil untuk saat ini)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
 # --- TAMPILAN UTAMA ---
@@ -35,27 +35,33 @@ if st.button("Terjemahkan Sekarang", use_container_width=True):
     if user_input.strip() == "":
         st.warning("Mohon masukkan teks terlebih dahulu.")
     else:
-        with st.spinner("Sedang menerjemahkan..."):
+        with st.spinner("Sedang memproses..."):
             try:
-                # PROMPT KETAT (Agar tidak bisa terjemah ke bahasa lain)
+                # PROMPT FILTER KETAT (Guardrail)
                 prompt_instruksi = (
-                    "TUGAS: Terjemahkan teks berikut HANYA ke Mandarin Taiwan (Traditional Chinese). "
-                    "ATURAN: "
-                    "1. Apapun inputnya, hasil HARUS Mandarin Taiwan. "
-                    "2. Gunakan aksara TRADITIONAL CHINESE. "
-                    "3. Jika user meminta bahasa lain selain Mandarin Taiwan, TOLAK dengan sopan. "
-                    "4. Berikan Pinyin dan penjelasan konteks Taiwan. "
-                    f"\n\nTeks: '{user_input}'"
+                    "SISTEM KEAMANAN PENERJEMAH:\n"
+                    "1. Periksa apakah user meminta terjemahan ke bahasa selain Mandarin Taiwan (seperti Inggris, Jepang, Korea, dll).\n"
+                    "2. Jika user meminta bahasa selain Mandarin Taiwan, JANGAN TERJEMAHKAN. "
+                    "Langsung jawab dengan kalimat: 'PERINGATAN: Saya hanya diizinkan menerjemahkan ke Mandarin Taiwan.'\n"
+                    "3. Jika user memberikan teks biasa, terjemahkan teks tersebut HANYA ke Mandarin Taiwan (Traditional Chinese).\n"
+                    "4. Hasil terjemahan harus menyertakan Pinyin dan cara baca Taiwan.\n"
+                    f"\nInput User: '{user_input}'"
                 )
 
                 response = model.generate_content(prompt_instruksi)
+                hasil_ai = response.text
                 
-                # Menampilkan Hasil
-                st.success("### Hasil Terjemahan (Traditional Chinese)")
-                st.markdown(response.text)
+                # LOGIKA PENYARINGAN HASIL
+                # Jika AI memberikan jawaban penolakan, tampilkan box merah (error)
+                if "PERINGATAN" in hasil_ai or "Maaf" in hasil_ai:
+                    st.error(hasil_ai)
+                else:
+                    # Jika jawaban valid, tampilkan box hijau (success)
+                    st.success("### Hasil Terjemahan (Traditional Chinese)")
+                    st.markdown(hasil_ai)
                 
             except Exception as e:
-                st.error(f"Terjadi kesalahan: {e}")
+                st.error(f"Terjadi kesalahan teknis: {e}")
 
 # --- FOOTER ---
 st.write("---")
