@@ -12,8 +12,8 @@ except Exception:
     st.error("API Key belum terpasang di Secrets Streamlit!")
     st.stop()
 
-# Menggunakan model Gemini 1.5 Flash yang stabil
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Menggunakan model Gemini 2.5 Flash yang stabil
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # --- TAMPILAN UTAMA ---
 st.title("🇹🇼 Penerjemah Khusus Mandarin Taiwan")
