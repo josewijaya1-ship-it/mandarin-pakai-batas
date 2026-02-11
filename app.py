@@ -13,7 +13,7 @@ except Exception:
     st.stop()
 
 # Menggunakan model Gemini 1.5 Flash (Sangat cepat dan akurat)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # --- TAMPILAN UTAMA ---
 st.title("🇹🇼 Penerjemah Khusus Mandarin Taiwan")
